@@ -65,8 +65,8 @@
                     "400": {
                         "description": "Bad Request"
                     },
-                    "404": {
-                        "description": "Request Not Found"
+                    "401": {
+                        "description": "Credential do not match"
                     }
                 }
             }

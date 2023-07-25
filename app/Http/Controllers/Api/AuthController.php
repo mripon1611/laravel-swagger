@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash as FacadesHash;
 
@@ -49,8 +50,8 @@ class AuthController extends Controller
      *          description="Bad Request"
      *      ),
      *      @OA\Response(
-     *          response=404,
-     *          description="Request Not Found"
+     *          response=401,
+     *          description="Credential do not match"
      *      )
      *     )
      */
@@ -58,12 +59,18 @@ class AuthController extends Controller
      public function login(Request $request){
         $validated = $request->validate(
             [
-                'email' => 'required|email|unique:users',
+                'email' => 'required|email',
                 'password' => 'required',
             ]
         );
 
-        return $request->all();
+        if (!Auth::attempt($request->only(['email', 'password']))) {
+            return response('Credential do not match', 401);
+        }
+        $user = User::where('email', $request->email)->first();
+        $success['token'] = $user->createToken('authToken')->accessToken;
+        $success['name'] = $user->name;
+        return response()->json(['success'=>$success]);
     }
 
 
